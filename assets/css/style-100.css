@@ -1,0 +1,15 @@
+.problembox{
+	border:grey 1px solid;
+}
+.bg-navbar{
+	background-color: #343a40;
+}
+.btn{
+	background-color: #6c757d;
+	color:white;
+	border: none;
+}
+.navbar2 a:hover {
+	border-bottom: 7px solid black;
+	color: #fff;
+}

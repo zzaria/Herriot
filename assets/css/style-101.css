@@ -1,0 +1,24 @@
+.problembox{
+	background-color: white;
+}
+:root{
+	--light-color: #e086c5;
+	--background-img:url("../images/backgrounds/e.jpg");
+}
+body {
+	line-height: 17px;
+	background-color: #E6EAE8;
+}
+.bg-navbar{
+	background-color: var(--light-color);
+	border-bottom: 0.25em solid #e520aa
+}
+.navbar2 a:hover {
+	border-bottom: 7px solid white;
+	color: #fff;
+}
+.column{
+	background-color: white;
+	border: 1px solid #D3D3D3;
+	box-shadow: 2px 2px 1px #D3D3D3;
+}
