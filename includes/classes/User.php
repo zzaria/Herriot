@@ -48,7 +48,7 @@ class User {
 		//$data_query = mysqli_query($this->con, $queryString);
 
         $no_more_users=true;
-		$count=0;
+		$count=$start;
 		if($option==1)
 			$ret=array();
         while($row = mysqli_fetch_array($data_query)){
