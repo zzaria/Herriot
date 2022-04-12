@@ -7,8 +7,8 @@ class Notification {
 	}
 
 	public function getUnreadNumber($user) {
-		$query = mysqli_query($this->con, "SELECT * FROM notifications WHERE viewed='no' AND user_to='$user'");
-		return mysqli_num_rows($query);
+		$query = mysqli_query($this->con, "SELECT COUNT(*) count FROM notifications WHERE viewed='no' AND user_to='$user'");
+		return mysqli_fetch_array($query)['count'];
 	}
 	function time_elapsed_string($datetime, $full = false) {
 		$now = new DateTime;
@@ -42,7 +42,7 @@ class Notification {
 		$ret = "";
 		mysqli_query($this->con, "UPDATE notifications SET viewed=1 WHERE user_to=$user");
 
-		$query = mysqli_query($this->con, "SELECT * FROM notifications WHERE user_to=$user ORDER BY id DESC");
+		$query = mysqli_query($this->con, "SELECT * FROM notifications INNER JOIN users ON user_from=users.id WHERE user_to=$user ORDER BY notifications.id DESC LIMIT 10");
 
 		if(mysqli_num_rows($query) == 0) {
 			echo "You have no notifications!";
@@ -58,21 +58,17 @@ class Notification {
 			if($user_from==0){
 				$ret.="<a href='" . $row['link'] . "'> 
 						<div class='resultDisplay resultDisplayNotification' style='" . $style . "'>
-							<p class='timestamp_smaller' id='grey'>" . $time_message . "</p>" . $row['message'] . "
+							<p class='mb-0 small'>" . $time_message . "</p>" . $row['message'] . "
 						</div>
 					</a>";
 				continue;
 			}
 
-			$user_data_query = mysqli_query($this->con, "SELECT * FROM users WHERE id=$user_from");
-			$user_data = mysqli_fetch_array($user_data_query);
-
 			$ret .= "<a href='" . $row['link'] . "'> 
 									<div class='resultDisplay resultDisplayNotification' style='" . $style . "'>
-										<div>
-											<img src='" . $user_data['profile_pic'] . "'>
-										</div>
-										<p class='timestamp_smaller' id='grey'>" . $time_message . "</p>" . $row['message'] . "
+										<img src='" . $row['profile_pic'] . "'>
+										<p class='mb-0 small'>" . $time_message . "</p>
+										{$row['message']}
 									</div>
 								</a>";
 		}
@@ -98,7 +94,6 @@ class Notification {
 			default:
 				$message = $type;
 		}
-
 		mysqli_query($this->con, "INSERT INTO notifications VALUES (NULL, $user_to, $user_from, '$message', '$link', '$date_time', 0,0)");
 	}
 

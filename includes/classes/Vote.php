@@ -8,8 +8,8 @@ class Vote {
     public function getQuality($parent){
         $parent=(int)$parent;
         $votes=mysqli_query($this->con,"SELECT value FROM votes WHERE parent=$parent AND type=0");
-        $num=5;
-        $sum=15;
+        $num=1;
+        $sum=3;
         while($row = mysqli_fetch_array($votes)){
             $sum+=$row['value'];
             $num++;

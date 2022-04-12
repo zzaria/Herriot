@@ -59,7 +59,7 @@ include("includes/handlers/add_post.php");
 
 <script>
 window.history.replaceState( null, null, window.location.href );
-if(<?php echo $user['perms']?> <2){
+if(<?php echo $user['perms']<Constants::ADMIN_PERMS? "true":"false"?>){
 	$('#announcementform').hide();
 }
 

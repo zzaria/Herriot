@@ -4,7 +4,7 @@ if(isset($_REQUEST['postId']))
     $postId=$_REQUEST['postId'];
 if(isset($_POST['post'])){
     $post = new Post($con);
-    if($_REQUEST['problem']<1&&$user['perms']<2&&$_REQUEST['parent']==0){
+    if($_REQUEST['problem']<1&&$user['perms']<Constants::ADMIN_PERMS&&$_REQUEST['parent']==0){
         exit;
     }
     $postId=$post->submitPost($_REQUEST['post_text'], $_REQUEST['problem'],$curUID,$_REQUEST['parent']);

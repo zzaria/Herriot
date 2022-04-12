@@ -5,18 +5,8 @@ include("includes/classes/User.php");
 include("includes/classes/Problem.php");
 include("includes/classes/Post.php");
 include("includes/classes/Notification.php");
+include("includes/current_user.php");
 
-
-if (isset($_SESSION['curUID'])) {
-	$curUID=$_SESSION['curUID'];
-	$user_details_query = mysqli_query($con, "SELECT * FROM users WHERE id='$curUID'");
-	$user = mysqli_fetch_array($user_details_query);
-	$userLoggedIn = $user['username'];
-}
-else {
-	header("Location: register.php");
-	exit;
-}
 $problemobj=new Problem($con);
 $theme=$user['theme'];
 ?>
@@ -28,6 +18,8 @@ $theme=$user['theme'];
 
 	<!-- Libraries -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+	<link href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro-v6@18657a9/css/all.min.css" rel="stylesheet" type="text/css" />
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
@@ -61,7 +53,7 @@ $theme=$user['theme'];
 
 	<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar1 p-1 bg-navbar">
 		<div class="navbar-brand ms-2 fs-2">
-			<a class="logo" href="index.php">ん<span class="logo-hover-black">Σ</span>尺я<span class="logo-hover-black">𝒾Ꭷ</span>₮</a>
+			<a class="logo" href="index.php"><span class="fs-1 fw-bold logo-hover-first">⟁</span>ん<span class="logo-hover-black">Σ</span>尺я<span class="logo-hover-black">𝒾Ꭷ</span>₮</a>
 		</div>
 		<ul class="navbar-nav">
 			<li class="nav-item"><a class="nav-link" href="problems.php">All Problems</a></li>
@@ -75,12 +67,21 @@ $theme=$user['theme'];
 				//Unread notifications 
 				$notifications = new Notification($con);
 				$num_notifications = $notifications->getUnreadNumber($curUID);
+				if($user['perms']>=Constants::ADMIN_PERMS)
+					echo '
+					<a href="admin.php">
+						<i class="fa-regular fa-alicorn"></i>
+					</a>
+					'
 			?>
 
 			<a href="profile.php?user=<?php echo $curUID; ?>">
 				<?php echo $problemobj->ratingCircle($user['power'],$user['username']); ?>
 			</a>
 			
+			<a href="blank.php">
+				<i class="fa-solid fa-citrus-slice"></i>
+			</a>
 			<a href="index.php">
 				<i class="fa fa-home fa-lg"></i>
 			</a>

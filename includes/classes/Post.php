@@ -7,6 +7,9 @@ class Post
 	{
 		$this->con = $con;
 	}
+	public function getAuthor($post){
+		return mysqli_fetch_array(mysqli_query($this->con, "SELECT author FROM posts WHERE id=$post"))['author'];
+	}
 
 	public function submitPost($body, $problem, $author, $parent)
 	{
@@ -32,7 +35,7 @@ class Post
 
 		//Insert notification
 		if ($parent != 0) {
-			$parentAuthor = mysqli_fetch_array(mysqli_query($this->con, "SELECT author FROM posts WHERE id=$parent"))['author'];
+			$parentAuthor = $this->getAuthor($parent);
 			if ($author != $parentAuthor) {
 				$notification = new Notification($this->con);
 				$notification->insertNotification($author, $parentAuthor, "post.php?id=" . $parent, "comment");
@@ -92,8 +95,9 @@ class Post
 
 
 		$ret = ""; //String to return 
-		$data_query = mysqli_query($this->con, "SELECT posts.id,posts.body,posts.author,posts.problem,posts.date_added,posts.likes,votes.value
-		FROM posts LEFT JOIN (SELECT value,parent FROM votes WHERE type=2 AND user=$user) votes ON posts.id=votes.parent
+		$data_query = mysqli_query($this->con, "SELECT posts.id,posts.body,posts.author,posts.problem,posts.date_added,posts.likes,votes.value,users.username,users.profile_pic,users.power FROM posts
+		LEFT JOIN (SELECT value,parent FROM votes WHERE type=2 AND user=$user) votes ON posts.id=votes.parent
+		INNER JOIN users ON users.id=posts.author
 		WHERE deleted=0 AND problem=$problem AND posts.parent=$parent
 		ORDER BY posts.id DESC LIMIT $start, $amount");
 
@@ -107,23 +111,22 @@ class Post
 			$author = $row['author'];
 			$time_message = $this->time_elapsed_string($row['date_added']);
 
-			if ($user == $author || $data['perms'] >= 1)
-				$delete_button = "<span class='delete_post' onclick='deletePost($id,1)'>X</span>";
+			if ($user == $author || $data['perms'] >= Constants::ADMIN_PERMS)
+				$delete_button = "<span class='float-end cursor-pointer' onclick='deletePost($id,1)'>X</span>";
 			else
 				$delete_button = "";
-			if($data['perms']>=2)
+			if($data['perms']>=Constants::ADMIN_PERMS)
 				$edit_post="ondblclick='editPost($id)'";
 			else
 				$edit_post="";
 
-
-			$user_details_query = mysqli_query($this->con, "SELECT username, profile_pic,power FROM users WHERE id='$author'");
-			$user_row = mysqli_fetch_array($user_details_query);
-			$username = $user_row['username'];
-			$profile_pic = $user_row['profile_pic'];
+			//todo: remove this query, join tables above
+			//$user_details_query = mysqli_query($this->con, "SELECT username, profile_pic,power FROM users WHERE id='$author'");
+			//$user_row = mysqli_fetch_array($user_details_query);
+			$username = $row['username'];
+			$profile_pic = $row['profile_pic'];
 			$post_link = "<a href=\"post.php?id=$id\">$id</a>";
 
-			//Timeframe
 			if ($getchildren) {
 				$children = "
 				<form id='commentForm{$id}' class='comment_form' method='POST' enctype='multipart/form-data'>
@@ -136,7 +139,7 @@ class Post
 					$this->loadPosts(array("amount" => 10000, "page" => 1, "problem" => $problem, "user" => $user, "perms" => $data['perms']), $id);
 			} else
 				$children = "";
-			$ratingCircle=$problem_obj->ratingCircle($user_row['power']," $username");
+			$ratingCircle=$problem_obj->ratingCircle($row['power']," $username");
 			$ret .= "<div class='status_post' id='comment-$id'>
 						<div class='post_profile_pic'>
 							<img src='$profile_pic' width='50'>
@@ -154,7 +157,7 @@ class Post
 							<span onclick=\"replyPost($id)\">Reply</span> &nbsp;&nbsp;&nbsp;
 							<iframe src='like.php?post=$id&user=$user&likes={$row['likes']}&current={$row['value']}' scrolling='no'></iframe>
 						</div>
-						<div class=\"post_children\">
+						<div class=\"mt-3 ms-5\">
 							$children
 						</div>
 					</div>";
@@ -247,7 +250,7 @@ class Post
 							<a href='$author'>$ratingCircle </a> $problemName &nbsp;&nbsp;&nbsp;&nbsp;$time_message
 							$delete_button
 							</div>
-							<div id='post_body'>
+							<div class='post_body'>
 								$body
 							</div>
 
@@ -255,7 +258,7 @@ class Post
 								<span onclick=\"$('#commentForm{$id}').show();\">Reply</span> &nbsp;&nbsp;&nbsp;
 								<iframe src='like.php?post=$id&user=$user&likes={$row['likes']}' scrolling='no'></iframe>
 							</div>
-							<div class=\"post_children\">
+							<div class=\"mt-3 ms-5\">
 								<form id='commentForm{$id}' class='comment_form' method='POST' enctype='multipart/form-data'>
 									<textarea class='form-control' name='post_text' id='post_text'></textarea>
 									<input type='hidden' name='problem' value={$problem}>

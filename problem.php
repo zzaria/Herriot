@@ -14,7 +14,7 @@ if(isset($_GET['id'])) {
   }
 
 	$problem = mysqli_fetch_array($problem_query);
-  if($problem['deleted']==1&&$user['perms']<1){
+  if($problem['deleted']==1&&$user['perms']<Constants::EDITOR_PERMS){
     echo "Problem not found";
     exit();
   }
@@ -132,7 +132,7 @@ $problems=new Problem($con);
     <div class="row g-4">
       <div class="col-12"><div class="side_column column">
             <div ondblclick="editProblem('quality')">
-              <h1 class="inline">Quality:</h1>
+              <h1 class="d-inline">Quality:</h1>
               <span id="quality"><?php echo $problem['quality']; ?></span>
             </div>
             <div>
@@ -149,7 +149,7 @@ $problems=new Problem($con);
         </div></div>
       <div class="col-12"><div class="side_column column">
         <div ondblclick="editProblem('difficulty')">
-          <h1 class="inline">Difficulty</h1>
+          <h1 class="d-inline">Difficulty</h1>
           <span>
             <?php echo $problems->ratingCircle($problem['difficulty'],"<span id=\"difficulty\">{$problem['difficulty']}</span>")?>  
           </span>
@@ -177,6 +177,7 @@ $problems=new Problem($con);
 </div></div>
 <div class="col-12"><div class="side_column column">
   <h1>Tags</h1>
+  <button class="btn btn-success" onclick="showSpoilers(this)">Show Spoilers</button>
   <span class="public_tags"><span class="placeholder placeholder-wave w-100"></span></span>
   <span class="editonly" id="newPublicTagDiv">
     <button class='square_button btn-success' onclick="showTagSelect('newPublicTag')">+</button>
@@ -189,19 +190,26 @@ $problems=new Problem($con);
     <select id="newUserTag" placeholder="new tag" onchange="addTag(this.value)"></select> 
   </span>
 </div></div>
-<div class="col-12">
-	<div class="side_column column">
+</div>
+<div class="row">
+  <div class="col-12"><div class="side_column column">
+			<h1>Recommended</h1>
+		</div></div>
+	<?php $problems->loadProblems(array("amount"=>6,"page"=>1,"mindifficulty"=>0,"maxdifficulty"=>4000,"minquality"=>0,"maxquality"=>5,"search"=>"","tag"=>-1,"sort"=>4,"order"=>0),0,2) ?>
+  <div class="col-12">
+    <div class="side_column column">
 
-		<h1>Recent Actions</h1>
+      <h1>Recent Actions</h1>
 
-		<div>
-			<?php 
-      $post=new Post($con);
-      echo $post->recentActions();
-			?>
-		</div>
-	</div>
-</div></div>
+      <div>
+        <?php 
+        $post=new Post($con);
+        echo $post->recentActions();
+        ?>
+      </div>
+    </div>
+  </div>
+</div>
 </div></div>
 </div>
 
@@ -275,7 +283,7 @@ if(window.innerWidth<1800){
     });
 
     
-    if(<?php echo $user['perms']?> < 1){
+    if(<?php echo $user['perms']<Constants::EDITOR_PERMS? "true":"false"?>){
       $('.editonly').hide();
       $('.lcs_wrap').hide();
     }
@@ -316,7 +324,7 @@ if(window.innerWidth<1800){
   }
   let editingProblem=false;
   function editProblem(fieldname){
-    if(<?php echo $user['perms']?> < 1)
+    if(<?php echo $user['perms']<Constants::EDITOR_PERMS? "true":"false"?>)
       return;
     if(editingProblem)
       return;
@@ -361,11 +369,12 @@ if(window.innerWidth<1800){
     });
 
   }
+  let hideSpoilers=1;
   function loadTags(){
     $.ajax({
         url: "includes/handlers/load_tags.php",
         type: "POST",
-        data: {problem:<?php echo $problem['id'] ?>,owner:"public",type:<?php echo $user['perms']<1? 2:0 ?>},
+        data: {problem:<?php echo $problem['id'] ?>,owner:"public",type:<?php echo $user['perms']<Constants::EDITOR_PERMS? 2:0 ?>,spoiler:hideSpoilers},
         cache:false,
 
         success: function(response) {
@@ -375,7 +384,7 @@ if(window.innerWidth<1800){
     $.ajax({
         url: "includes/handlers/load_tags.php",
         type: "POST",
-        data: {problem:<?php echo $problem['id'] ?>,owner:"personal",type:0},
+        data: {problem:<?php echo $problem['id'] ?>,owner:"personal",type:0,spoiler:hideSpoilers},
         cache:false,
 
         success: function(response) {
@@ -421,6 +430,8 @@ if(window.innerWidth<1800){
     
   }
   function removeTag(tag){
+    if(<?php echo $user['perms']<Constants::ADMIN_PERMS? "true":"false"?>)
+      return;
     $.ajax({
         url: "includes/handlers/remove_problemtags.php",
         type: "POST",
@@ -434,6 +445,9 @@ if(window.innerWidth<1800){
 
   }
 
+  function showSpoilers(el){
+    hideSpoilers=0; loadTags(); el.remove();
+  }
 
 $(function(){
   let problem = '<?php echo $_REQUEST['id']; ?>';

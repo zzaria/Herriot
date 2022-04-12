@@ -9,7 +9,7 @@ $date = "";
 $errors = array(); 
 
 if(isset($_POST['register_button'])){
-	$username=strtolower(strip_tags($_POST['registration_username']));
+	$username=trim(strtolower(strip_tags($_POST['registration_username'])));
 	$email=strtolower(strip_tags($_POST['registration_email']));
 	$password=$_POST['registration_password'];
 	$password2=$_POST['registration_password2'];
@@ -34,6 +34,9 @@ if(isset($_POST['register_button'])){
 	}
 	if(strlen($username)>100){
 		array_push($errors,"Username must be 100 characters or less");
+	}
+	else if(strlen($username)==0){
+		array_push($errors,"Invalid Username");
 	}
 	else if($same_username->num_rows>0){
 		array_push($errors, "Username already exists");
@@ -70,7 +73,7 @@ if(isset($_POST['register_button'])){
 		$tags->createTag("Skipped",$user,"rgba(184, 218, 255,0.5)");
 		$tags->createTag("Favourites",$user,"rgba(255, 105, 180,0.5)");
 		header("Location: index.php");
-        exit;
+		exit;
 	}
 }
 ?>

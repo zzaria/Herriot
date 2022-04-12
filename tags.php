@@ -9,20 +9,28 @@ include("includes/header.php");
 		<table class="table">
 			<thead>
 				<tr>
-					<th>Public Tags</th>
-				</tr>
-			</thead>
-			<tbody class="public_tags"></tbody>
-		</table>
-		<table class="table">
-			<thead>
-				<tr>
 					<th>Personal Tags</th>
 				</tr>
 			</thead>
 			<tbody class="personal_tags"></tbody>
 		</table>
 		<input type="text" onchange="newTag(this.value)" placeholder="Create new tag" class="form-control">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Shared Tags</th>
+				</tr>
+			</thead>
+			<tbody class="shared_tags"></tbody>
+		</table>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Public Tags</th>
+				</tr>
+			</thead>
+			<tbody class="public_tags"></tbody>
+		</table>
 
 	</div>
 </div></div>
@@ -32,11 +40,22 @@ function loadTags(){
 	$.ajax({
 		url: "includes/handlers/load_tags.php",
 		type: "POST",
-		data: {problem:-1,owner:"public",type:3},
+		data: {problem:-1,owner:"public",type:3,spoiler:0},
 		cache:false,
 
 		success: function(response) {
 			$(".public_tags").html(response);
+		}
+	});
+	$.ajax({
+		url: "includes/handlers/load_tags.php",
+		type: "POST",
+		data: {problem:-1,owner:"personal",type:5},
+		cache:false,
+
+		success: function(response) {
+			console.log(response);
+			$(".shared_tags").html(response);
 		}
 	});
 	$.ajax({

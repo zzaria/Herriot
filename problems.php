@@ -5,37 +5,36 @@ $page=isset($_REQUEST['page'])? $_REQUEST['page']:1;
 <div class="row g-5">
 <div class="col-md-3 col-12">
 	<div class="search column">
-		<form>
-			<div class="form-floating" >
-				<input name="search" class="form-control" id="search" type="text" onkeyup="updateSearch(this.name,this.value)" placeholder="search">
-				<label for="search">Search</label>
+		<div class="form-floating" >
+			<input name="search" class="form-control" id="search" type="text" onkeyup="updateSearch(this.name,this.value)" placeholder="search" value="<?php echo isset($_REQUEST['search'])? $_REQUEST['search'] :''?>">
+			<label for="search">Search</label>
+		</div>
+		<div>
+			<div class="form-check form-check-inline">
+				<label class="form-label" for="editorial">Editorial</label>
+				<input name="editorial" class="form-check-input" id="editorial" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['editorial'])) echo "checked"?>>
 			</div>
-			<div>
-				<div class="form-check form-check-inline">
-					<label class="form-label" for="editorial">Editorial</label>
-					<input name="editorial" class="form-check-input" id="editorial" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['editorial'])) echo "checked"?>>
-				</div>
-				<div class="form-check form-check-inline">
-					<label class="form-label" for="code">Code</label>
-					<input name="code" class="form-check-input" id="code" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['code'])) echo "checked"?>>
-				</div>
-				<div class="form-check form-check-inline">
-					<label class="form-label" for="data">Data</label>
-					<input name="data" class="form-check-input" id="data" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['data'])) echo "checked"?>>
-				</div>
+			<div class="form-check form-check-inline">
+				<label class="form-label" for="code">Code</label>
+				<input name="code" class="form-check-input" id="code" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['code'])) echo "checked"?>>
 			</div>
-			<div class="sliders">
-				<label class="form-label" for="mindifficulty">Min Difficulty <span class="form-text" id="mindifficultylabel">0</span></label>
-				<input name="mindifficulty" class="form-range" id="mindifficulty" type="range" min="0" max="4000" step="100" onchange ="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['mindifficulty'])? $_REQUEST['mindifficulty'] :0?>>
-				<label class="form-label" for="maxdifficulty">Max Difficulty <span class="form-text" id="maxdifficultylabel">4000</span></label>
-				<input name="maxdifficulty" class="form-range" id="maxdifficulty" type="range" min="0" max="4000" step="100" onchange="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['maxdifficulty'])? $_REQUEST['maxdifficulty'] :5000?>>
-				<label class="form-label" for="minquality">Min Quality <span class="form-text" id="minqualitylabel">0</span></label>
-				<input name="minquality" class="form-range" id="minquality" type="range" min="0" max="5" onchange="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['minquality'])? $_REQUEST['minquality'] :0?>>
-				<label class="form-label" for="maxquality">Max Quality <span class="form-text" id="maxqualitylabel">5</span></label>
-				<input name="maxquality" class="form-range" id="maxquality" type="range" min="0" max="5" onchange="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['maxquality'])? $_REQUEST['maxquality'] :5?>>
+			<div class="form-check form-check-inline">
+				<label class="form-label" for="data">Data</label>
+				<input name="data" class="form-check-input" id="data" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['data'])) echo "checked"?>>
 			</div>
-			<input class="btn btn-primary" type="submit" value="Search">
-		</form>
+		</div>
+		<div class="sliders">
+			<label class="form-label" for="mindifficulty">Min Difficulty <span class="form-text" id="mindifficultylabel">0</span></label>
+			<input name="mindifficulty" class="form-range" id="mindifficulty" type="range" min="0" max="4000" step="100" onchange ="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['mindifficulty'])? $_REQUEST['mindifficulty'] :0?>>
+			<label class="form-label" for="maxdifficulty">Max Difficulty <span class="form-text" id="maxdifficultylabel">4000</span></label>
+			<input name="maxdifficulty" class="form-range" id="maxdifficulty" type="range" min="0" max="4000" step="100" onchange="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['maxdifficulty'])? $_REQUEST['maxdifficulty'] :5000?>>
+			<label class="form-label" for="minquality">Min Quality <span class="form-text" id="minqualitylabel">0</span></label>
+			<input name="minquality" class="form-range" id="minquality" type="range" min="0" max="5" onchange="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['minquality'])? $_REQUEST['minquality'] :0?>>
+			<label class="form-label" for="maxquality">Max Quality <span class="form-text" id="maxqualitylabel">5</span></label>
+			<input name="maxquality" class="form-range" id="maxquality" type="range" min="0" max="5" onchange="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['maxquality'])? $_REQUEST['maxquality'] :5?>>
+		</div>
+		<input class="btn btn-primary" type="submit" value="Search" onclick="window.location.search=$.param(query)">
+		<button class="btn btn-dark" onclick="window.location.search=''">Reset</button>
 	</div>
 	</div>
 	<div class="col-md-9 col-12">
@@ -92,28 +91,28 @@ let query={amount:amount,mindifficulty:0,maxdifficulty:4000,minquality:0,maxqual
 		echo "query['$key']='$value';";
 	}
 ?>
-
+let searchDelay;
 function updateSearch(key,value){
+	if(query[key]===value)
+		return;
 	query[key]=value;
 	if(key=='mindifficulty'||key=='maxdifficulty'||key=='minquality'||key=='maxquality'){
 		$('#'+key+'label').text(value);
 	}
-	reload();
+	clearTimeout(searchDelay);
+	searchDelay=setTimeout(()=>{
+		reload();
+	},200);
 }
 function sortBy(num){
-	const urlParams = new URLSearchParams(window.location.search);
-	urlParams.set('sort', num);
-	urlParams.set('order', <?php echo isset($_REQUEST['order'])? 1-$_REQUEST['order']:true ?>);
-	window.location.search = urlParams;
+	$('#sort'+query['sort']).find("span").text('');
+	updateSearch('sort',num);
+	updateSearch('order',1-query['order']);
 }
 
-let inProgress = false;
+let inProgress = 0;
 function loadProblems() {
-	if(inProgress) { //If it is already in the process of loading some posts, just return
-		return;
-	}
-	
-	inProgress = true;
+	let id=++inProgress;
 	$('.loading').show();
 
 	let page = <?php echo $page?>;
@@ -125,12 +124,13 @@ function loadProblems() {
 		cache:false,
 
 		success: function(response) {
+			if(id!=inProgress)
+				return;
 			$('.problems').find('.nextPage').remove(); //Removes current .nextpage 
 			$('.problems').find('.noMorePosts').remove(); //Removes current .nextpage 
 
 			$('.loading').hide();
 			$(".problems").append(response);
-			inProgress = false;
 		}
 	});
 }
@@ -174,7 +174,7 @@ function reload(){
 }
 
 $(function(){
-	if(<?php echo $user['perms']?> < 1)
+	if(<?php echo $user['perms']<Constants::EDITOR_PERMS? "true":"false"?>)
 		$('#add_problem').hide();
 	reload();
 });

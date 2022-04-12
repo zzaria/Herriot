@@ -55,10 +55,11 @@ $verifyString="herriot-user-".md5("herriot-user-".$curUID);
 			</thead>
 			<tbody>
 <?php
-if($user['perms']>=2){
-	$waitlist=mysqli_query($con,"SELECT * from editor_waitlist WHERE closed=0");
+if($user['perms']>=Constants::ADMIN_PERMS){
+	$waitlist=mysqli_query($con,"SELECT username,editor_waitlist.id,users.id user,message
+	FROM editor_waitlist INNER JOIN users ON editor_waitlist.user=users.id WHERE closed=0");
 	while($row = mysqli_fetch_array($waitlist)){
-		$name=mysqli_fetch_array(mysqli_query($con,"SELECT username FROM users WHERE id={$row['user']}"))['username'];
+		$name=$row['username'];
 		echo "<tr><td><a href='profile.php?user={$row['user']}'>{$name}</a></td>
 			<td>{$row['message']}</td>
 			<td onclick='accept({$row['id']},{$row['user']})'>Accept</td>
@@ -91,7 +92,7 @@ $(function(){
 	successAlert=$('#success_alert')[0].outerHTML;
 	failedAlert=$('#failed_alert')[0].outerHTML;
 	$('#alert').empty();
-	if(<?php echo $user['perms']?><2)
+	if(<?php echo $user['perms']<Constants::ADMIN_PERMS? "true":"false"?>)
 		$('#waitlist').hide();
 });
 

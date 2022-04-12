@@ -36,6 +36,12 @@ a:hover {
 	color:black;
 }
 
+/*utilities*/
+
+.cursor-pointer{
+	cursor: pointer;
+}
+
 /*navbar*/
 
 .navbar2 {
@@ -74,7 +80,6 @@ a:hover {
 	color:#007bff;
 }
 
-/*problemlist*/
 .problem-subcolumn{
 	border-radius: 5px;
 	padding:10px;
@@ -88,9 +93,6 @@ a:hover {
 }
 
 /*other*/
-.problemlist{
-	font-weight: 300;
-}
 .problemlist td{
 	padding:16px 22px;
 }
@@ -128,12 +130,6 @@ a:hover {
 	padding:10px;
 }
 
-.inline{
-	display:inline;
-}
-#pcount{
-	float: right;
-}
 .small_profile_pic{
 	height:160px;
 }
@@ -253,10 +249,6 @@ a:hover {
 	text-shadow: #73B6E2 0.5px 0.5px 0px;
 	float:right;
 }
-.delete_post{
-	float:right;
-	cursor: pointer;
-}
 .newsfeedPostOptions {
 	padding: 0px;
 	text-decoration: none;
@@ -267,9 +259,6 @@ a:hover {
 .newsfeedPostOptions iframe {
 	border: 0px;
 	height: 17px;
-}
-.post_children{
-	margin: 20px 0 0 50px;
 }
 
 .comment_like {
@@ -349,9 +338,4 @@ a:hover {
     border-radius: 5px;
     margin: 1px 12px 0px 2px;
     float: left;
-}
-
-.timestamp_smaller {
-	font-size: 85%;
-	margin: 0;
 }

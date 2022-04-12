@@ -1,4 +1,5 @@
 <?php
+
 class Tag {
 	private $con;
 
@@ -6,7 +7,7 @@ class Tag {
 		$this->con = $con;
 	}
     
-    public function getTags($problem,$owner,$type) {
+    public function getTags($problem,$owner,$type,$spoiler=0) {
         $problem=(int)$problem;
         $owner=(int)$owner;
 		$ret = "";
@@ -14,7 +15,7 @@ class Tag {
             $tags=mysqli_query($this->con,"SELECT tags.id,name,background 
             FROM tagowners
             INNER JOIN tags ON tagowners.tag=tags.id
-            WHERE tagowners.owner=$owner AND tags.id NOT IN
+            WHERE tagowners.owner=$owner AND tagowners.type=0 AND tags.id NOT IN
             (SELECT tagproblems.tag FROM tagproblems WHERE tagproblems.problem=$problem)") ;
             $ret .= "<option>Add tag</option>";
         }
@@ -23,58 +24,81 @@ class Tag {
             FROM tagowners a
             INNER JOIN tagowners b ON a.tag=b.tag
             INNER JOIN tags ON a.tag=tags.id
-            WHERE a.owner=$owner AND b.owner=0");
+            WHERE a.owner=$owner AND a.type=0 AND b.owner=0");
         }
-        else if($problem==-1&&$owner==-1){
-            $tags=mysqli_query($this->con,"SELECT tags.id,name,background 
-            FROM tags");
-        }
-        else if($problem==-1){
+        else if($type==3){
             $tags=mysqli_query($this->con,"SELECT tags.id,name,background
             FROM tagowners
             INNER JOIN tags ON tagowners.tag=tags.id
-            WHERE tagowners.owner=$owner");
+            WHERE tagowners.owner=$owner AND tagowners.type=0");
         }
-        else if($owner==-1){
-            $tags=mysqli_query($this->con,"SELECT tags.id,name,background 
-            FROM tagproblems
-            INNER JOIN tags ON tagproblems.tag=tags.id
-            WHERE tagproblems.problem=$problem");
+        else if($type==5){
+            $tags=mysqli_query($this->con,"SELECT tags.id,name,background
+            FROM tagowners
+            INNER JOIN tags ON tagowners.tag=tags.id
+            WHERE tagowners.owner=$owner AND tagowners.type=1");
         }
         else{
-            $tags=mysqli_query($this->con,"SELECT tags.id,name,background 
-            FROM tagowners
-            INNER JOIN tagproblems ON tagowners.tag=tagproblems.tag
-            INNER JOIN tags ON tagowners.tag=tags.id
-            WHERE tagowners.owner=$owner AND tagproblems.problem=$problem");
+            if($spoiler==1){
+                $tags=mysqli_query($this->con,"SELECT tags.id,name,background 
+                FROM tagowners
+                INNER JOIN tagproblems ON tagowners.tag=tagproblems.tag
+                INNER JOIN tags ON tagowners.tag=tags.id
+                WHERE tagowners.owner=$owner AND tagowners.type=0 AND tagproblems.problem=$problem AND spoiler=0");
+            }
+            else{
+                $tags=mysqli_query($this->con,"SELECT tags.id,name,background 
+                FROM tagowners
+                INNER JOIN tagproblems ON tagowners.tag=tagproblems.tag
+                INNER JOIN tags ON tagowners.tag=tags.id
+                WHERE tagowners.owner=$owner AND tagproblems.problem=$problem");
+            }
         }
 
+        $colors=Array("primary","secondary","success","danger","warning text-dark","info","light text-dark","dark");
+        if($type==4)
+            $thumbnails = scandir('assets/images/thumbnails/');
         while($row = mysqli_fetch_array($tags)){
-            $color=$row['background'];
+            if($type==0||$type==2){
+                $color=$row['background'];
+                $color2="";
+                if($color==""){
+                    $color2="bg-".$colors[$row['id']%count($colors)];
+                }
+                else{
+                    $a=Color::fromString($color);
+                    $L=$a->toHSL();
+                    $L=$L['L'];
+                    $a=$a->getAlpha();
+                    if((1-$L)*$a>0.7)
+                        $color2="text-light";
+                    else if($L*$a>0.7)
+                        $color2="text-dark";
+                }
+            }
             $optionVal=$row['id'];
             if($owner>0&&$row['name']=="Solved-$owner")
                 $optionVal=-$row['id'];
             if($type==0)
                 $ret .= "
-                    <div class=\"tag_chip\" style='border-color: $color;'>
+                    <span class='badge $color2' style='background-color: $color;'>
                         {$row['name']}
-                        <div class=\"chip_x\" onclick=\"removeTag({$optionVal})\" style='background-color: $color;'>x</div>
-                    </div>
+                        <span class='cursor-pointer' onclick=\"removeTag({$optionVal})\">x</span>
+                    </span>
                     ";
             else if($type==1)
                 $ret .= "<option value=\"{$optionVal}\">{$row['name']}</option>";
             else if($type==2)
                 $ret .= "
-                    <span class='badge bg-primary' style='border-color: $color;'>
+                    <span class='badge $color2' style='background-color: $color;'>
                         {$row['name']}
                     </span>
                     ";
-            else if($type==3)
+            else if($type==3||$type==5)
                 $ret .= "<tr><td><a href=\"tag.php?id={$row['id']}\">{$row['name']}</a></td></tr>";
             else if($type==4){
                 $thumbnail=$row['thumbnail'];
                 if($thumbnail==""){
-                    $thumbnails = scandir('assets/images/thumbnails/');
                     $rand = $row['id']%(count($thumbnails)-2)+2;
                     $thumbnail = "assets/images/thumbnails/".$thumbnails[$rand];
                 }
@@ -92,7 +116,7 @@ class Tag {
         $problem=(int)$problem;
         $tag=(int)$tag;
         if(mysqli_num_rows(mysqli_query($this->con,"SELECT * FROM tagproblems WHERE tag=$tag AND problem=$problem"))==0){
-            $idx=mysqli_num_rows(mysqli_query($this->con,"SELECT * FROM tagproblems WHERE tag=$tag"))+1;
+            $idx=mysqli_num_rows(mysqli_query($this->con,"SELECT * FROM tagproblems WHERE tag=$tag"))+1;//retodo place with count
             mysqli_query($this->con, "INSERT INTO tagproblems VALUES (NULL, $tag, $problem, $idx)");
         }
     }
@@ -108,14 +132,14 @@ class Tag {
         }
     }
     public function createTag($name,$user,$background=''){
-        $sql=mysqli_prepare($this->con,"INSERT INTO tags VALUES (NULL, ?,?,'','')");
+        $sql=mysqli_prepare($this->con,"INSERT INTO tags VALUES (NULL, ?,?,'','',0)");
 		mysqli_stmt_bind_param($sql,"ss",$name,$background);
 		mysqli_stmt_execute($sql);
 		$query=mysqli_stmt_get_result($sql);
         echo $query;
         //mysqli_query($this->con, "INSERT INTO tags VALUES (NULL, '$name')");
         $tag = mysqli_insert_id($this->con);
-        mysqli_query($this->con, "INSERT INTO tagowners VALUES (NULL, $tag,$user)");
+        mysqli_query($this->con, "INSERT INTO tagowners VALUES (NULL, $tag,$user,0)");
         echo $name,$user,$tag;
         return $tag;
     }
@@ -133,7 +157,7 @@ class Tag {
         INNER JOIN tagproblems ON tagowners.tag=tagproblems.tag
         INNER JOIN tags ON tagowners.tag=tags.id
         INNER JOIN problems ON tagproblems.problem=problems.id
-        WHERE tagowners.owner=$user AND tags.name='Solved-$user'");
+        WHERE tagowners.owner=$user AND tagowners.type=0 AND tags.name='Solved-$user'");
         $count=mysqli_num_rows($tags);
         $solved=array();
         $points=$points2=0;
@@ -154,16 +178,25 @@ class Tag {
         $points2=round($points2,4);
         return array($count,$points,$points2);
     }
-    public function shareTag($tag,$user){
+    public function shareTag($tag,$user,$value){
         $tag=(int)$tag;
         $user=(int)$user;
-        if(mysqli_num_rows(mysqli_query($this->con,"SELECT * FROM tagowners WHERE tag=$tag AND owner=$user"))==0)
-            mysqli_query($this->con, "INSERT INTO tagowners VALUES (NULL, $tag,$user)");
+        $value=(int)$value;
+        $query=mysqli_query($this->con,"SELECT * FROM tagowners WHERE tag=$tag AND owner=$user");
+        if($row=mysqli_fetch_array($query)){
+            if($row['type']==1)
+                mysqli_query($this->con, "UPDATE tagowners SET type=$value WHERE id={$row['id']}");
+        }
+        else
+            mysqli_query($this->con, "INSERT INTO tagowners VALUES (NULL, $tag,$user,$value)");
     }
-    public function unshareTag($tag,$user){
+    public function unshareTag($tag,$user,$viewerOnly=0){
         $tag=(int)$tag;
         $user=(int)$user;
-        mysqli_query($this->con, "DELETE FROM tagowners WHERE tag=$tag AND owner=$user");
+        if($viewerOnly)
+            mysqli_query($this->con, "DELETE FROM tagowners WHERE tag=$tag AND owner=$user AND type=1");
+        else
+            mysqli_query($this->con, "DELETE FROM tagowners WHERE tag=$tag AND owner=$user");
     }
     public function copyTag($tag,$user){
         $tag=(int)$tag;
@@ -177,13 +210,27 @@ class Tag {
     }
     public function getOwners($tag){
         $tag=(int)$tag;
-        $ret="Shared with: ";
+        $ret="Owners: ";
         $owners=mysqli_query($this->con,"SELECT users.id,users.username
         FROM tagowners
         INNER JOIN users ON users.id=tagowners.owner
-        WHERE tag=$tag");
+        WHERE tag=$tag AND type=0");
         while($row = mysqli_fetch_array($owners)){
             $ret.="<a href=\"profile.php?user={$row['id']}\">{$row['username']}</a>, ";
+        }
+        echo $ret;
+    }
+    public function getViewers($tag){
+        $tag=(int)$tag;
+        $ret="";
+        $viewers=mysqli_query($this->con,"SELECT users.id,users.username
+        FROM tagowners
+        INNER JOIN users ON users.id=tagowners.owner
+        WHERE tag=$tag AND type=1");
+        $colors=Array("primary","secondary","success","danger","warning","info","light text-dark","dark");
+        while($row = mysqli_fetch_array($viewers)){
+            $color=$colors[$row['id']%count($colors)];
+            $ret.="<span class='badge rounded-pill bg-$color'>{$row['username']} <span class='cursor-pointer' onclick=shareTag({$row['id']},-1)>x</span></span>";
         }
         echo $ret;
     }

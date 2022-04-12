@@ -34,7 +34,7 @@ switch($_REQUEST['method']) {
         echo 'success';
         break;
     case 'manualAccept':
-        if($user['perms']<2){
+        if($user['perms']<Constants::ADMIN_PERMS){
             echo 'failed';
             exit;
         }
@@ -44,6 +44,16 @@ switch($_REQUEST['method']) {
         mysqli_query($con,"UPDATE users SET perms=1 WHERE id={$_REQUEST['user']} AND perms=0");
         $notifs=New Notification($con);
         $notifs->insertNotification(0,$_REQUEST['user'],"editor.php","You can now edit problems");
+        echo 'success';
+        break;
+    case 'addAdmin':
+        if($user['perms']<Constants::ADMIN_PERMS){
+            echo 'failed';
+            exit;
+        }
+        $user=(int)$_REQUEST['user'];
+        $val=Constants::ADMIN_PERMS;
+        mysqli_query($con,"UPDATE users SET perms={$val} WHERE id={$user}");
         echo 'success';
         break;
 } 

@@ -26,7 +26,7 @@ include("includes/header.php");
 <script>
 
 let amount=100;
-let query={amount:amount,search:"",sort:0,option:0};
+let query={amount:amount,search:"",sort:2,option:0};
 function sortBy(sort){
 	updateSearch('sort',sort);
 }

@@ -119,32 +119,51 @@ class Problem {
 		mysqli_stmt_execute($sql);
 		$data_query=mysqli_stmt_get_result($sql);
 		//$data_query = mysqli_query($this->con, $query);
-
-        $rows=mysqli_query($this->con,"SELECT tags.background,tagproblems.problem FROM tags INNER JOIN tagproblems ON tags.id=tagproblems.tag INNER JOIN tagowners ON tags.id=tagowners.tag WHERE tagowners.owner=$user");
-        foreach($rows as $key=>$row){
-            if($row['background']!='')
-                $background[$row['problem']]=$row['background'];
+        if($type==0){
+            $rows=mysqli_query($this->con,"SELECT tags.background,tagproblems.problem FROM tags INNER JOIN tagproblems ON tags.id=tagproblems.tag INNER JOIN tagowners ON tags.id=tagowners.tag WHERE tagowners.owner=$user AND tagowners.type=0");
+            foreach($rows as $key=>$row){
+                if($row['background']!='')
+                    $background[$row['problem']]=$row['background'];
+            }
         }
-
+        
         $no_more_problems=true;
         $idx=$start;
+        if($type==1)
+            $thumbnails = scandir('assets/images/thumbnails/');
         while($row = mysqli_fetch_array($data_query)){
             $no_more_problems=false;
             $idx++;
             $circle=$this->ratingCircle($row['difficulty'],$row['difficulty']);
             $rowbg="";
-            if(isset($background[$row['id']]))
-                $rowbg="style='background-color: {$background[$row['id']]}'";
+            $color2="";
+            if($type==0&&isset($background[$row['id']])&&$background[$row['id']]!=""){
+                $color=$background[$row['id']];
+                $a=Color::fromString($color);
+                $L=$a->toHSL();
+                $L=$L['L'];
+                $a=$a->getAlpha();
+                $rowbg="style='background-color: {$color}'";
+                if((1-$L)*$a>0.5)
+                    $color2="style='color: lightblue'";
+                else if($L*$a>0.5)
+                    $color2="style='color: #007bff'";
+            }
             if($type==1){
                 $thumbnail=$row['thumbnail'];
-                /*if($thumbnail==""){
-                    $thumbnails = scandir('assets/images/thumbnails/');
+                if($thumbnail==""){
                     $rand = $row['id']%(count($thumbnails)-2)+2;
                     $thumbnail = "assets/images/thumbnails/".$thumbnails[$rand];
-                }*/
+                }
                 $ret.="
                 <div class='col-3'><a href='{$row['id']}'><div class='problembox h-100'>
                     <img class='card-img-top' src='{$thumbnail}'>
+                    <p>{$row['name']}</p>
+                </div></a></div>";
+            }
+            else if($type==2){
+                $ret.="
+                <div class='col-4'><a href='{$row['id']}'><div class='problembox h-100'>
                     <p>{$row['name']}</p>
                 </div></a></div>";
             }
@@ -152,7 +171,7 @@ class Problem {
                 $ret .= "
                         <tr>
                             <td>$idx</td>
-                            <td $rowbg><a href=\"{$row['id']}\">{$row['name']} </a></th>
+                            <td $rowbg><a $color2 href=\"{$row['id']}\">{$row['name']} </a></th>
                             <td style='padding-bottom:0'>{$circle}</th>
                             <td>{$row['quality']}</th>
                         </tr>
@@ -161,8 +180,8 @@ class Problem {
             else{
                 $ret .= "
                         <tr id=\"{$row['tagproblemid']}\">
-                            <th>{$row['idx']}</th>
-                            <td $rowbg><a href=\"{$row['id']}\">{$row['name']}</a></td>
+                            <th>$idx</th>
+                            <td $rowbg><a $color2 href=\"{$row['id']}\">{$row['name']}</a></td>
                             <td>{$circle}</th>
                             <td>{$row['quality']}</th>
                             <td>

@@ -58,7 +58,7 @@ include("includes/header.php");
 				an <a href="editor.php">editor</a>. You'll need to meet one of the verification criteria or have an administrator personally
 				accept your request, although more options and lower requirements might be added later.</p>
 
-				<p>Once you are an editor, double click on a problem section to edit it.</p>
+				<p>Another way to help is to write some crawlers or scripts to automate some of the problem and tagging process.</p>
 			</div>
 			</div>
 		</div>
@@ -74,6 +74,14 @@ include("includes/header.php");
 					<p>> <small class="text-muted">Why are the problems empty?</small></p>
 				</blockquote>
 				<p>Editors need to fill out the information. See the contributing section above to help out.</p>
+				<blockquote class="blockquote">
+					<p>> <small class="text-muted">How is your total power determined?</small></p>
+				</blockquote>
+				<p>
+					Your power is a rating for the difficulty of your practice, calculated as an
+					exponential average of the problems you solve. It's similar to the osu or dmoj
+					performance point systems.
+				</p>
 			</div>
 			</div>
 		</div>

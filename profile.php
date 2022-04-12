@@ -30,7 +30,7 @@ $levelPercentage=$levelProgress/$levelAmount*100;
 <div class="row g-2">
   <div class="col-md-3 col-0"></div>
   <div class="col-md-8 col-12">
-    <div class="dark_column column">
+    <div class="dark_background column">
       <div class="row">
         <div class="col-8">
           <h1 class="display-2"><?php echo $username ?></h1>
@@ -58,7 +58,7 @@ $levelPercentage=$levelProgress/$levelAmount*100;
   </div>
   <div class="col-md-3 col-0"></div>
   <div class="col-md-8 col-12">
-    <div class="column dark_column">
+    <div class="column dark_background">
       <div class="row">
         <h2 class="text-center">Tags</h2>
         <?php $tag->getTags(-1, $userID, 4) ?>

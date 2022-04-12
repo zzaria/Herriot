@@ -6,7 +6,7 @@ if(isset($_POST['update_details'])) {
 	$email = $_POST['email'];
 	$email=strtolower(strip_tags($email));
 	$username = $_POST['username'];
-	$username=strtolower(strip_tags($username));
+	$username=trim(strtolower(strip_tags($username)));
 	$profile_pic = $_POST['profile_pic'];
 	$profile_pic=htmlspecialchars($profile_pic);
 
@@ -23,6 +23,8 @@ if(isset($_POST['update_details'])) {
 		$message.="Invalid email format";
 	if(strlen($username)>100)
 		$message.="Username must be 100 characters or less";
+	else if(strlen($username)==0)
+		$message.="Invalid Username";
 	$check = mysqli_fetch_array($same_email);
 	if($check&&$check['id'] != $curUID)
 		$message.= "That email is already in use!<br><br>";

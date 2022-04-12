@@ -11,6 +11,7 @@
 	--light-color: lightblue;
 	--background-img:url("../images/backgrounds/e.jpg");
 	--medium-glass: rgba(0,0,0,0.6);
+	--light-white-glass: rgba(255,255,255,0.15);
 }
 .scroller {
 	scrollbar-color: rebeccapurple black;
@@ -39,6 +40,16 @@ a:hover {
 	text-decoration: none;
 	color:white;
 }
+/*utilities*/
+
+.cursor-pointer{
+	cursor: pointer !important;
+}
+.dark_background{
+	background-color:rgba(0,0,0,0.9) !important;
+}
+
+/*navbars*/
 
 .bg-navbar{
 	background-color: var(--medium-glass);
@@ -52,6 +63,9 @@ a:hover {
 }
 .logo:hover .logo-hover-black{
 	color:black;
+}
+.logo:hover .logo-hover-first{
+	text-shadow: 0 0 1px white, 0 0 2px white, 0 0 5px white;
 }
 .navbar1 a{
 	color: #fff;
@@ -88,7 +102,6 @@ a:hover {
 	border-color: rgba(255,255,255,0.05);
 }
 
-/*problemlist*/
 .problem-subcolumn{
 	background-color: var(--medium-glass);
 	border-radius: 5px;
@@ -101,7 +114,7 @@ a:hover {
 	color:white;
 }
 .column input[type="text"],input[type="password"],input[type="email"]{
-	background-color: rgba(255,255,255,0.15);
+	background-color: var(--light-white-glass);
 	color:white;
 }
 .column textarea{
@@ -110,7 +123,7 @@ a:hover {
 	font-size: 12px;
 }
 .column select{
-	background-color: rgba(255,255,255,0.15);
+	background-color: var(--light-white-glass);
 	color:white;
 	border:1px solid #ced4da;
 	font-size: 1rem;
@@ -118,7 +131,7 @@ a:hover {
 }
 .column option{
 	color:white;
-	background-color: rgba(255,255,255,0.15);
+	background-color: var(--light-white-glass);
 }
 .column input::placeholder{
 	color:white;
@@ -143,6 +156,9 @@ a:hover {
 /*other*/
 .problemlist td{
 	padding:16px 22px;
+}
+.problemlist a:hover{
+	color:white !important;
 }
 .problem-tab{ 
 	padding: 1rem 2rem;
@@ -186,21 +202,13 @@ a:hover {
 .tag-fullbanner img{
 	width:100%;
 }
-.dark_column{
-	background-color:rgba(0,0,0,0.9);
-}
 .problembox{
 	color:white;
 	background-color: rgba(255,255,255,0.1);
 	padding:10px;
+	word-wrap: break-word;
 }
 
-.inline{
-	display:inline;
-}
-#pcount{
-	float: right;
-}
 .small_profile_pic{
 	height:160px;
 }
@@ -325,10 +333,6 @@ a:hover {
 	text-shadow: #73B6E2 0.5px 0.5px 0px;
 	float:right;
 }
-.delete_post{
-	float:right;
-	cursor: pointer;
-}
 .newsfeedPostOptions {
 	padding: 0px;
 	text-decoration: none;
@@ -339,9 +343,6 @@ a:hover {
 .newsfeedPostOptions iframe {
 	border: 0px;
 	height: 17px;
-}
-.post_children{
-	margin: 20px 0 0 50px;
 }
 
 .comment_like {
@@ -361,6 +362,8 @@ a:hover {
 	font-size: 14px;
 	color:white;
 }
+
+/*notifications*/
 
 .resultDisplay {
 	padding: 5px 5px 0 5px;
@@ -421,9 +424,4 @@ a:hover {
     border-radius: 5px;
     margin: 1px 12px 0px 2px;
     float: left;
-}
-
-.timestamp_smaller {
-	font-size: 85%;
-	margin: 0;
 }

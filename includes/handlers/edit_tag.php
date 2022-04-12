@@ -3,13 +3,14 @@ include("../../config/config.php");
 include("../classes/Tag.php");
 include("../classes/Notification.php");
 include("../current_user.php");
+include("../classes/Constants.php");
 
-$sql=mysqli_prepare($con,"SELECT * FROM tagowners WHERE tag=? AND owner=?");
+$sql=mysqli_prepare($con,"SELECT * FROM tagowners WHERE tag=? AND owner=? AND type=0");
 mysqli_stmt_bind_param($sql,"si",$_REQUEST['tag'],$curUID);
 mysqli_stmt_execute($sql);
 $access_query=mysqli_stmt_get_result($sql);
 //$access_query= mysqli_query($con, "SELECT * FROM tagowners WHERE tag={$_REQUEST['tag']} AND owner={$curUID}");
-if(mysqli_num_rows($access_query) == 0 && $user['perms']<1) {
+if(mysqli_num_rows($access_query) == 0 && $user['perms']<Constants::EDITOR_PERMS) {
     echo "Tag unavailable";
     exit;
 }
@@ -17,12 +18,14 @@ if(mysqli_num_rows($access_query) == 0 && $user['perms']<1) {
 $tags = new Tag($con);
 switch($_REQUEST['action']){
     case 'share':
-        $sql=mysqli_prepare($con, "SELECT id FROM users WHERE username=?");
-        mysqli_stmt_bind_param($sql,"s",$_REQUEST['name']);
-        mysqli_stmt_execute($sql);
-        $user2=mysqli_fetch_array(mysqli_stmt_get_result($sql))['id'];
+        $user2=$_REQUEST['user'];
+        $value=$_REQUEST['value'];
+        if($value==-1){
+            $tags->unshareTag($_REQUEST['tag'],$user2,1);
+            break;
+        }
         //$user2=mysqli_fetch_array(mysqli_query($con,"SELECT id FROM users WHERE username='{$_REQUEST['name']}'"))['id'];
-        $tags->shareTag($_REQUEST['tag'],$user2);
+        $tags->shareTag($_REQUEST['tag'],$user2,$value);
         if($curUID!=$user2){
             $notifications=new Notification($con);
             $notifications->insertNotification($curUID,$user2,"tag.php?id=".$_REQUEST['tag'],"sharetag");
@@ -35,7 +38,7 @@ switch($_REQUEST['action']){
         $tags->copyTag($_REQUEST['tag'],$_REQUEST['user']);
         break;
     case 'edit':
-        if(!in_array($_REQUEST['field'],array("name","background","thumbnail","banner")))
+        if(!in_array($_REQUEST['field'],array("name","background","thumbnail","banner","spoiler")))
             exit;
         $tags->editTag($_REQUEST['tag'],$_REQUEST['field'],htmlspecialchars($_REQUEST['value']));
         break;
@@ -44,7 +47,7 @@ switch($_REQUEST['action']){
         break;
 }
 
-if($user['perms']<1) {
+if($user['perms']<Constants::EDITOR_PERMS) {
     echo "No perms";
     exit;
 }
@@ -52,14 +55,14 @@ if($user['perms']<1) {
 
 switch($_REQUEST['action']){
     case 'public':
-        $tags->shareTag($_REQUEST['tag'],0);
+        $tags->shareTag($_REQUEST['tag'],0,0);
         break;
     case 'unpublic':
         $tags->unshareTag($_REQUEST['tag'],0);
         break;
 }
 
-if($user['perms']<2){
+if($user['perms']<Constants::ADMIN_PERMS){
     echo "No perms";
     exit;
 }

@@ -1,8 +1,9 @@
 <?php  
 include("../../config/config.php");
 include("../current_user.php");
+include("../classes/Constants.php");
 
-if($user['perms']<1) {
+if($user['perms']<Constants::EDITOR_PERMS) {
     echo "No perms";
     exit;
 }

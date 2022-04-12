@@ -4,13 +4,13 @@ include("includes/header.php");
 include("includes/classes/Tag.php");
 if(isset($_REQUEST['id'])) {
 	$id = (int)$_REQUEST['id'];
-	$query = mysqli_query($con, "SELECT * FROM tags WHERE id=$id");
 	$access_query= mysqli_query($con, "SELECT * FROM tagowners WHERE tag=$id AND (owner={$curUID} OR owner=0)");
-  if(mysqli_num_rows($access_query) == 0 && $user['perms']<1) {
-    echo "Tag unavailable";
-    exit();
-  }
+	if(mysqli_num_rows($access_query) == 0 && $user['perms']<Constants::EDITOR_PERMS) {
+		echo "Tag unavailable";
+		exit();
+	}
 
+	$query = mysqli_query($con, "SELECT * FROM tags WHERE id=$id");
 	$tag = mysqli_fetch_array($query);
 	$page=isset($_REQUEST['page'])? $_REQUEST['page']:1;
 }
@@ -22,19 +22,24 @@ $tags=new Tag($con);
 ?>
 <div class="row g-5">
 <div class="col-md-3 col-12">
-<div class="search column" id="search_options">
-	<form>
+	<div class="search column">
 		<div class="form-floating" >
-			<input name="search" class="form-control" id="search" type="text" onkeyup="updateSearch(this.name,this.value)" placeholder="search">
+			<input name="search" class="form-control" id="search" type="text" onkeyup="updateSearch(this.name,this.value)" placeholder="search" value="<?php echo isset($_REQUEST['search'])? $_REQUEST['search'] :''?>">
 			<label for="search">Search</label>
 		</div>
 		<div>
-			<label class="form-label" for="editorial">Editorial</label>
-			<input name="editorial" class="form-check-input" id="editorial" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['editorial'])) echo "checked"?>>
-			<label class="form-label" for="code">Code</label>
-			<input name="code" class="form-check-input" id="code" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['code'])) echo "checked"?>>
-			<label class="form-label" for="data">Data</label>
-			<input name="data" class="form-check-input" id="data" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['data'])) echo "checked"?>>
+			<div class="form-check form-check-inline">
+				<label class="form-label" for="editorial">Editorial</label>
+				<input name="editorial" class="form-check-input" id="editorial" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['editorial'])) echo "checked"?>>
+			</div>
+			<div class="form-check form-check-inline">
+				<label class="form-label" for="code">Code</label>
+				<input name="code" class="form-check-input" id="code" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['code'])) echo "checked"?>>
+			</div>
+			<div class="form-check form-check-inline">
+				<label class="form-label" for="data">Data</label>
+				<input name="data" class="form-check-input" id="data" type="checkbox" onchange="updateSearch(this.name,this.checked)" <?php if(isset($_REQUEST['data'])) echo "checked"?>>
+			</div>
 		</div>
 		<div class="sliders">
 			<label class="form-label" for="mindifficulty">Min Difficulty <span class="form-text" id="mindifficultylabel">0</span></label>
@@ -46,10 +51,8 @@ $tags=new Tag($con);
 			<label class="form-label" for="maxquality">Max Quality <span class="form-text" id="maxqualitylabel">5</span></label>
 			<input name="maxquality" class="form-range" id="maxquality" type="range" min="0" max="5" onchange="updateSearch(this.name,this.value)" value=<?php echo isset($_REQUEST['maxquality'])? $_REQUEST['maxquality'] :5?>>
 		</div>
-		<input type="hidden" name="id" value="<?php echo $tag['id'] ?>">
-		<input class="btn btn-primary" type="submit" value="Search">
-	</form>
-</div>
+		<input class="btn btn-primary" type="submit" value="Search" onclick="window.location.search=$.param(query)">
+	</div>
 </div>
 <div class="col-md-9 col-12">
 <div class="column">
@@ -121,8 +124,20 @@ $tags=new Tag($con);
 			<input type="text" class="form-control" id="background" value="<?php echo $tag['background']?>">
 		</div>
 		<div class="input-group">
-			<span class="input-group-text">Share Tag</span>
+			<span class="input-group-text">Invite Collaborator</span>
 			<select type="text" id="newowner" multiple="multiple"></select>
+		</div>
+		<div class="input-group">
+			<span class="input-group-text">Share Tag</span>
+			<select type="text" id="newviewer" multiple="multiple"></select>
+		</div>
+		<div>
+			Shared with:
+			<span id="viewers"><?php echo $tags->getViewers($id) ?></span>
+		</div>
+		<div class="form-check form-switch">
+			<input class="form-check-input" type="checkbox" role="switch" id="spoiler" <?php echo $tag['spoiler']? "checked":""?> onchange="editTag('spoiler',Number(this.checked))">
+			<label class="form-check-label" for="spoiler">Spoiler</label>
 		</div>
 		<input type="submit" class="btn btn-danger" data-toggle="modal" onclick="leaveTag()" value="Leave Tag">
 		<input type="submit" class="btn btn-secondary" data-toggle="modal" onclick="copyTag()" value="Copy Tag">
@@ -168,7 +183,36 @@ $(function(){
 					option:1,
 					amount:100,
 					page:1,
-					search:params.term,
+					search:params.term?? "",
+					sort:0,
+					order:0,
+				}
+			},
+			processResults: function(data){
+				return {
+					results: data,
+				};
+			}
+			// Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+		}
+	});
+	$('#newviewer').on('select2:select', function (e) {
+		shareTag(e.params.data['id'],1);
+	});
+	$('#newviewer').select2({
+		selectionCssClass:"form-control",
+		width:"20%",
+		ajax: {
+			url: "includes/handlers/load_users.php",
+			dataType: 'json',
+			data: function(params){
+				return {
+					option:1,
+					amount:100,
+					page:1,
+					search:params.term?? "",
+					sort:0,
+					order:0,
 				}
 			},
 			processResults: function(data){
@@ -180,7 +224,7 @@ $(function(){
 		}
 	});
 	$('#newowner').on('select2:select', function (e) {
-		shareTag(e.params.data['text'])
+		shareTag(e.params.data['id'],0);
 	});
 	$(".select2-selection").css('background-color','rgba(255,255,255,0.15)');
 	$(".select2-selection").css('border-bottom-left-radius','0');
@@ -222,12 +266,12 @@ $.ajax({
 	}
 });
 }
-function editTag(field="none"){
-	if(field=="none"){
+function editTag(field=null,value=null){
+	if(field===null){
 		field=$('#editTagOption').val();
 		value=$('#editTagValue').val();
 	}
-	else{
+	else if(value===null){
 		value=$('#'+field).val();
 	}
 	if(field==="name"&&value.length>64){
@@ -245,11 +289,11 @@ function editTag(field="none"){
 		}
 	});
 }
-function shareTag(name){
+function shareTag(user,value){
 $.ajax({
 	url: "includes/handlers/edit_tag.php",
 	type: "POST",
-	data: {tag:<?php echo $id ?>,name:name,action:'share'},
+	data: {tag:<?php echo $id ?>,user:user,value:value,action:'share'},
 	cache:false,
 
 	success: function(response) {
@@ -266,7 +310,7 @@ function deleteTagProblem(problem){
 		cache:false,
 
 		success: function(response) {
-			location.reload();
+			reload(true);
 		}
 	});
 }
@@ -306,30 +350,31 @@ let query={...query0};
 	}
 ?>
 
+let searchDelay;
 function updateSearch(key,value){
+	if(query[key]===value)
+		return;
 	query[key]=value;
 	if(key=='mindifficulty'||key=='maxdifficulty'||key=='minquality'||key=='maxquality'){
 		$('#'+key+'label').text(value);
 	}
-	reload();
+	clearTimeout(searchDelay);
+	searchDelay=setTimeout(()=>{
+		reload();
+	},200);
 }
 function sortBy(num){
-	const urlParams = new URLSearchParams(window.location.search);
-	urlParams.set('sort', num);
-	urlParams.set('order', <?php echo isset($_REQUEST['order'])? 1-$_REQUEST['order']:true ?>);
-	window.location.search = urlParams;
+	$('#sort'+query['sort']).find("span").text('');
+	updateSearch('sort',num);
+	updateSearch('order',1-query['order']);
 }
 
-let inProgress = false;
+let inProgress = 0;
 function loadProblems(edit=false) {
-	if(inProgress) { //If it is already in the process of loading some posts, just return
-		return;
-	}
-	
-	inProgress = true;
+	let id=++inProgress;
 	$('.loading').show();
 
-	let page = $('.problems').find('.nextPage').val() || 1; //If .nextPage couldn't be found, it must not be on the page yet (it must be the first time loading posts), so use the value '1'
+	let page = <?php echo $page?>;
 	query['page']=page;
 	$.ajax({
 		url: "includes/handlers/load_problems.php",
@@ -338,13 +383,13 @@ function loadProblems(edit=false) {
 		cache:false,
 
 		success: function(response) {
+			if(id!=inProgress)
+				return;
 			$('.problems').find('.nextPage').remove(); //Removes current .nextpage 
 			$('.problems').find('.noMorePosts').remove(); //Removes current .nextpage 
-			$('.problems').find('.noMorePostsText').remove(); //Removes current .nextpage 
 
 			$('.loading').hide();
 			$(".problems").append(response);
-			inProgress = false;
 			if(edit){
 				$('.square_button').show();
 				sortable('.sortable',{
