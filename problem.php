@@ -96,7 +96,7 @@ $problems=new Problem($con);
               </div>
             </div></div>
             <div class="col-12 editonly"> <div class="problem-subcolumn">
-            <button class="btn btn-dark float-end" data-bs-toggle="popover" data-bs-trigger="focus" title="Edit Problem" data-bs-content="Double click on a section to edit it.">Edit Problem</button>  
+            <button class="btn btn-dark float-end" data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus" title="Edit Problem" data-bs-content="Double click on a section to edit it.">Edit Problem</button>  
             <div ondblclick="editProblem('thumbnail')">Change Thumbnail: <span id="thumbnail"><?php echo $problem['thumbnail']?></span></div>
             <div ondblclick="editProblem('banner')">Change Banner: <span id="banner"><?php echo $problem['banner']?></span></div>
             </div></div>
@@ -130,7 +130,7 @@ $problems=new Problem($con);
 <div class="row g-4">
 <div class="col-6">
     <div class="row g-4">
-      <div class="col-12"><div class="side_column column">
+      <div class="col-12"><div class="side_column column" <?php if($user['perms']<Constants::EDITOR_PERMS) echo "data-bs-toggle='popover' data-bs-trigger='hover' data-bs-content='Become an editor to vote.'"?>>
             <div ondblclick="editProblem('quality')">
               <h1 class="d-inline">Quality:</h1>
               <span id="quality"><?php echo $problem['quality']; ?></span>
@@ -147,7 +147,7 @@ $problems=new Problem($con);
             </div>
             <input type="checkbox" id="quality_lock" <?php if($problem['quality_lock']) echo "checked"?>>
         </div></div>
-      <div class="col-12"><div class="side_column column">
+      <div class="col-12"><div class="side_column column" <?php if($user['perms']<Constants::EDITOR_PERMS) echo "data-bs-toggle='popover' data-bs-trigger='hover' data-bs-content='Become an editor to vote.'"?>>
         <div ondblclick="editProblem('difficulty')">
           <h1 class="d-inline">Difficulty</h1>
           <span>
@@ -156,7 +156,7 @@ $problems=new Problem($con);
         </div>
         <label class="form-label" for="difficulty_vote">Vote: <span class="form-text" id="difficulty_vote_label">None</span></label>
         
-        <button type="button" class="btn btn-outline-danger btn-sm" data-mdb-ripple-color="dark" onclick="voteDifficulty('')">
+        <button type="button" class="btn btn-outline-danger btn-sm" data-mdb-ripple-color="dark" onclick="voteDifficulty('')" <?php echo $user['perms']<Constants::EDITOR_PERMS? "disabled":""?>>
           X
         </button>
         <input class="" id="difficulty_vote" type="range" min="0" max="4000" step="100" onchange ="voteDifficulty(this.value)" <?php if($user['perms']<Constants::EDITOR_PERMS) echo "disabled"?>>
@@ -309,7 +309,9 @@ if(window.innerWidth<1800){
     });
   }
   function voteDifficulty(value){
-    $('#difficulty_vote_label').text(value);
+    if(<?php echo $user['perms']<Constants::EDITOR_PERMS? "true":"false"?>)
+      return;
+    $('#difficulty_vote_label').text(value||'None');
     $.ajax({
         url: "includes/handlers/add_vote.php",
         type: "POST",
@@ -430,7 +432,7 @@ if(window.innerWidth<1800){
     
   }
   function removeTag(tag){
-    if(<?php echo $user['perms']<Constants::ADMIN_PERMS? "true":"false"?>)
+    if(<?php echo $user['perms']<Constants::EDITOR_PERMS? "true":"false"?>)
       return;
     $.ajax({
         url: "includes/handlers/remove_problemtags.php",
