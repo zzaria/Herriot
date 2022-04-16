@@ -27,11 +27,11 @@ $verifyString="herriot-user-".md5("herriot-user-".$curUID);
 	<div>
 		<div class="form-text">
 			Set your First Name (english) to 
-			<span class="toast position-absolute" data-bs-delay="500" style="width:auto; top:200px; right:30%">
-				<span class="toast-body">
-				Copied
-				</span>
-			</span>
+			<div class="toast-container position-absolute top-0 start-50 translate-middle-x">
+				<div class="toast" data-bs-delay="500">
+					<div class="toast-body">Copied</div>
+				</div>
+			</div>
 			<code onclick="copyCode(this)" data-bs-toggle="tooltip" data-bs-original-title="Click to Copy"><?php echo $verifyString ?></code> at 
 			<a href="https://codeforces.com/settings/social">https://codeforces.com/settings/social</a>.
 			You need at least <?php echo Constants::EDITOR_RATING_CF?> rating.

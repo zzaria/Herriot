@@ -10,7 +10,9 @@
 :root{
 	--light-color: lightblue;
 	--background-img:url("../images/backgrounds/e.jpg");
+	--light-glass: rgba(0,0,0,0.15);
 	--medium-glass: rgba(0,0,0,0.6);
+	--heavy-glass: rgba(0,0,0,0.9);
 	--light-white-glass: rgba(255,255,255,0.15);
 }
 .scroller {
@@ -46,7 +48,7 @@ a:hover {
 	cursor: pointer !important;
 }
 .dark_background{
-	background-color:rgba(0,0,0,0.9) !important;
+	background-color: var(--heavy-glass) !important;
 }
 
 /*navbars*/
@@ -118,7 +120,7 @@ a:hover {
 	color:white;
 }
 .column textarea{
-	background-color: rgba(0,0,0,0.15);
+	background-color: var(--light-glass);
 	color:white;
 	font-size: 12px;
 }
@@ -140,7 +142,7 @@ a:hover {
 	color:white;
 }
 .column textarea:focus{
-	background-color: rgba(0,0,0,0.15);
+	background-color: var(--light-glass);
 	color:white;
 }
 .sliders input::-moz-range-track{
@@ -385,14 +387,15 @@ a:hover {
     width: 300px;
     top: 40px;
     right: 0px;
-    position: absolute;
+    position: fixed;
+	z-index: 1000;
 	overflow: hidden;
 }
 .dropdown_data_window {
 	position:relative;
 	height: 200px;
 	overflow-y: scroll;
-    background-color: rgba(0,0,0,0.1);
+	background-color: var(--light-glass);
 	z-index:9;
 	color:#ACACAC;
 }

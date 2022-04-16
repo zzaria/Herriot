@@ -48,6 +48,8 @@ include("includes/handlers/settings_handler.php");
 	<div class="btn-group" role="group" aria-label="Theme">
 		<input type="radio" class="btn-check" name="theme" id="btnradio1" value="0" onchange="updTheme(this.value)">
 		<label class="btn btn-outline-primary" for="btnradio1">Default</label>
+		<input type="radio" class="btn-check" name="theme" id="btnradio2" value="1" onchange="updTheme(this.value)">
+		<label class="btn btn-outline-primary" for="btnradio2">Theme 1</label>
 		<input type="radio" class="btn-check" name="theme" id="btnradio3" value="2" onchange="updTheme(this.value)">
 		<label class="btn btn-outline-primary" for="btnradio3">Theme 2</label>
 		<input type="radio" class="btn-check" name="theme" id="btnradio4" value="3" onchange="updTheme(this.value)">
@@ -60,6 +62,8 @@ include("includes/handlers/settings_handler.php");
 		<label class="btn btn-outline-primary" for="btnradio7">Theme 6</label>
 		<input type="radio" class="btn-check" name="theme" id="btnradio8" value="7" onchange="updTheme(this.value)">
 		<label class="btn btn-outline-primary" for="btnradio8">Theme 7</label>
+	</div>
+	<div class="btn-group" role="group" aria-label="Theme">
 		<input type="radio" class="btn-check" name="theme" id="btnradio2" value="100" onchange="updTheme(this.value)">
 		<label class="btn btn-outline-primary" for="btnradio2">Classic</label>
 		<input type="radio" class="btn-check" name="theme" id="btnradio9" value="101" onchange="updTheme(this.value)">

@@ -8,7 +8,7 @@ $timezone = date_default_timezone_set("Europe/London");
 $con = mysqli_init();
 
 //**/mysqli_real_connect($con,"localhost","root","","herriot");/*
-mysqli_real_connect($con,$_ENV["HERRIOT_HOSTNAME"],$_ENV["HERRIOT_USERNAME"],$_ENV["HERRIOT_PASSWORD"],$_ENV["HERRIOT_HOSTNAME"]);//*/
+mysqli_real_connect($con,"remotemysql.com","AmqHpz3bzP","dLoDquV3iV","AmqHpz3bzP");//*/
 mysqli_set_charset($con, 'utf8mb4');
 
 if(mysqli_connect_errno()) 

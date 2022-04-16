@@ -122,6 +122,10 @@ $theme=$user['theme'];
 				$(".dropdown_wrapper").css('top','140px');
 			}
 			switch(theme){
+				case 1:
+					$('body').css('background-image','url(assets/images/backgrounds/h.jpg)');
+					$('.problembox').css('color','black');
+					break;
 				case 2:
 					$('body').css('background-image','url(assets/images/backgrounds/a.jpg)');
 					break;
